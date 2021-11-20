@@ -84,12 +84,14 @@ namespace ConsoleApp1
             var i = 0;
             while (i < TaskNum)
             {
+                Console.WriteLine($"{Thread.CurrentThread.Name} 쓰레드 - task {i} 수행 - 요청: {RequestNum} -시작");
                 taskBox.Add( RunHttpAsync(client,i));
                 i++;
             }
-           foreach(Task<bool> task in taskBox)
+            for(int j = 0; j < taskBox.Count; j++)
             {
-                task.Wait();
+                taskBox[j].Wait();
+                Console.WriteLine($"{Thread.CurrentThread.Name} 쓰레드 - task {j}종료");
             }
         }
 
