@@ -25,6 +25,9 @@ namespace ConsoleApp1
         }
         static int RequestNum { get; set; }
         static int TaskNum { get; set; }
+        static long TotalRequest { get; set; }
+        static long SendRequest { get; set; }
+
         static void Main()
         {
             Console.WriteLine("목적지 IP 입력 : ");
@@ -58,6 +61,8 @@ namespace ConsoleApp1
                 Console.WriteLine("입력 오류");
                 return;
             }
+            TotalRequest = threadNum * taskNum * requestNum;
+            SendRequest = 0;
             RequestNum = requestNum;
 
             List<Thread> threadBox = new List<Thread>();
@@ -103,11 +108,13 @@ namespace ConsoleApp1
                 for(int c = 0; c < RequestNum; c++) { 
                 HttpResponseMessage response = await client.GetAsync("http://"+destIP);
                 response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
+               string responseBody = await response.Content.ReadAsStringAsync();
+                    SendRequest++;
                     // Above three lines can be replaced with new helper method below
                     // string responseBody = await client.GetStringAsync(uri);
 
                     //Console.WriteLine(responseBody);
+                    Console.WriteLine($"{SendRequest}/{TotalRequest}");
                 }
             }
             catch (HttpRequestException e)
