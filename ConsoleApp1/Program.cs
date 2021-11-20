@@ -11,7 +11,7 @@ namespace ConsoleApp1
 {
     class Program
     {
-        static readonly HttpClient client = new HttpClient();
+      
         private static String destIP;
         static String DestIP
         {
@@ -24,6 +24,7 @@ namespace ConsoleApp1
             }
         }
         static int RequestNum { get; set; }
+        static int TaskNum { get; set; }
         static void Main()
         {
             Console.WriteLine("목적지 IP 입력 : ");
@@ -43,7 +44,15 @@ namespace ConsoleApp1
                 return;
             }
 
-            Console.WriteLine("각 쓰레드마다 보낼 요청 수 : ");
+            Console.WriteLine("태스크 갯수 : ");
+            if (!Int32.TryParse(Console.ReadLine(), out int taskNum))
+            {
+                Console.WriteLine("입력 오류");
+                return;
+            }
+            TaskNum = taskNum;
+
+            Console.WriteLine("태스크 당 요청 갯수 : ");
             if (!Int32.TryParse(Console.ReadLine(), out int requestNum))
             {
                 Console.WriteLine("입력 오류");
@@ -70,27 +79,34 @@ namespace ConsoleApp1
         }
         static void DoStart()
         {
+            List<Task> taskBox = new List<Task>();
+            HttpClient client = new HttpClient();
             var i = 0;
-            while (i < RequestNum)
+            while (i < TaskNum)
             {
-                Task<bool> a = RunHttpAsync(i);
-                Console.WriteLine(i + " - 실행 - " + Thread.CurrentThread.Name);
+                taskBox.Add( RunHttpAsync(client,i));
                 i++;
+            }
+           foreach(Task<bool> task in taskBox)
+            {
+                task.Wait();
             }
         }
 
-        static async Task<bool> RunHttpAsync(int i)
+        static async Task<bool> RunHttpAsync(HttpClient client, int i)
         {
 
             try
             {
+                for(int c = 0; c < RequestNum; c++) { 
                 HttpResponseMessage response = await client.GetAsync("http://"+destIP);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
-                // Above three lines can be replaced with new helper method below
-                // string responseBody = await client.GetStringAsync(uri);
+                    // Above three lines can be replaced with new helper method below
+                    // string responseBody = await client.GetStringAsync(uri);
 
-                //Console.WriteLine(responseBody);
+                    //Console.WriteLine(responseBody);
+                }
             }
             catch (HttpRequestException e)
             {
@@ -101,8 +117,8 @@ namespace ConsoleApp1
             catch(Exception e2)
             {
                 Console.WriteLine(e2.ToString());
+                return false;
             }
-            Console.WriteLine(i + " - 완료");
             return true;
         }
 
