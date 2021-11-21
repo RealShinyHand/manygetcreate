@@ -66,7 +66,6 @@ namespace ConsoleApp1
             RequestNum = requestNum;
 
             List<Thread> threadBox = new List<Thread>();
-            // Call asynchronous network methods in a try/catch block to handle exceptions.
             for (int i = 0; i < threadNum; i++)
             {
                 threadBox.Add(new Thread(new ThreadStart(DoStart)));
